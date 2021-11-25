@@ -43,7 +43,7 @@ const BUFFER_HEIGHT: usize = 25;
 const BUFFER_WIDTH:  usize = 80;
 
 #[repr(transparent)]
-struct Buffer {
+pub struct Buffer {
     chars: [[Volatile<ScreenChar>; BUFFER_WIDTH]; BUFFER_HEIGHT]
 }
 
@@ -140,4 +140,26 @@ macro_rules! println {
 pub fn _print(args: core::fmt::Arguments) {
     use core::fmt::Write;
     WRITER.lock().write_fmt(args).unwrap();
+}
+
+#[test_case]
+fn println_simple() {
+    println!("test_println_simple output");
+}
+
+#[test_case]
+fn println_many() {
+    for _ in 0..200 {
+        println!("println_many output")
+    }
+}
+
+#[test_case]
+fn println_output() {
+    let s = "test string which fits on a single line";
+    println!("{}", s);
+    for(i, c) in s.chars().enumerate() {
+        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT-2][i].read();
+        assert_eq!(char::from(screen_char.ascii_character),c);
+    }
 }
