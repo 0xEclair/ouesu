@@ -1,6 +1,5 @@
 #![no_std]
 #![no_main]
-#![feature(asm)]
 #![feature(custom_test_frameworks)]
 #![test_runner(ouesu::test_runner)]
 #![reexport_test_harness_main = "test_main"]
@@ -9,13 +8,18 @@ use core::panic::PanicInfo;
 mod vga_buffer;
 mod serial;
 
+#[cfg(not(test))]
 #[no_mangle] // bootloader
 pub extern "C" fn _start() -> ! {
     println!("Hello ouesu{}", "!");
+    ouesu::init();
+
+    x86_64::instructions::interrupts::int3();
 
     #[cfg(test)]
     test_main();
 
+    println!("it didn't crash.");
     loop {}
 }
 
