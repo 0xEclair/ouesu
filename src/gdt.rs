@@ -4,6 +4,10 @@ use lazy_static::lazy_static;
 use x86_64::structures::gdt::{GlobalDescriptorTable, Descriptor};
 use x86_64::structures::gdt::SegmentSelector;
 
+///
+/// A GDT contains its TSS address.
+///
+///
 pub const DOUBLE_FAULT_IST_INDEX: u16 = 0;
 
 lazy_static! {
