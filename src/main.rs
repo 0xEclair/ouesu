@@ -4,6 +4,7 @@
 #![test_runner(ouesu::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 use core::panic::PanicInfo;
+use ouesu::hlt_loop;
 
 mod vga_buffer;
 mod serial;
@@ -14,17 +15,11 @@ pub extern "C" fn _start() -> ! {
     println!("Hello ouesu{}", "!");
     ouesu::init();
 
-    fn stack_overflow() {
-        stack_overflow();
-    }
-
-    stack_overflow();
-
     #[cfg(test)]
     test_main();
 
     println!("it didn't crash.");
-    loop {}
+    hlt_loop();
 }
 
 #[cfg(not(test))]
