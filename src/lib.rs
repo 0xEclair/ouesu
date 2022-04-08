@@ -6,11 +6,15 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
+#[cfg(test)]
+use bootloader::{BootInfo, entry_point};
+use x86_64::instructions::hlt;
 
 pub mod serial;
 pub mod vga_buffer;
 mod interrupts;
 pub mod gdt;
+pub mod memory;
 
 pub trait Testable {
     fn run(&self) -> ();
@@ -40,10 +44,12 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
 }
 
 #[cfg(test)]
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+entry_point!(test_kernel_main);
+
+#[cfg(test)]
+fn test_kernel_main(_: &'static BootInfo) -> ! {
     init();
-    test_main();
+
     hlt_loop();
 }
 

@@ -4,19 +4,32 @@
 #![test_runner(ouesu::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 use core::panic::PanicInfo;
+use bootloader::{BootInfo, entry_point};
+
 use ouesu::hlt_loop;
 
 mod vga_buffer;
 mod serial;
 
+entry_point!(kernel_main);
+
 #[cfg(not(test))]
-#[no_mangle] // bootloader
-pub extern "C" fn _start() -> ! {
+fn kernel_main(boot_info: &'static BootInfo) -> ! {
+    use ouesu::memory::active_level_4_table;
+    use x86_64::VirtAddr;
     println!("Hello ouesu{}", "!");
     ouesu::init();
 
-    #[cfg(test)]
-    test_main();
+    let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+    let l4_table = unsafe {
+        active_level_4_table(phys_mem_offset)
+    };
+
+    for (i, entry) in l4_table.iter().enumerate() {
+        if !entry.is_unused() {
+            println!("L4 Entry {}: {:?}", i, entry);
+        }
+    }
 
     println!("it didn't crash.");
     hlt_loop();
